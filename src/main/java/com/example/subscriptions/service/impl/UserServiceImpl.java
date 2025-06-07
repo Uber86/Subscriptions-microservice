@@ -25,11 +25,11 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User createUser(User user) {
-        if(!(user.getPhone() != null &&
-                user.getEmail() != null &&
-                user.getFirstName() != null &&
-                user.getLastName() != null &&
-                user.getBirthday() != null)){
+        if(user.getPhone() == null &&
+                user.getEmail() == null &&
+                user.getFirstName() == null &&
+                user.getLastName() == null &&
+                user.getBirthday() == null) {
             throw new IllegalArgumentException("Отсутствует поле");
         }
         return userRepository.save(user);

@@ -2,6 +2,7 @@ package com.example.subscriptions.controller;
 
 import com.example.subscriptions.model.User;
 import com.example.subscriptions.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,17 +22,17 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable long userId) {
-        return ResponseEntity.ok(service.getUser(userId));
+    public ResponseEntity<User> getUser(@PathVariable long id) {
+        return ResponseEntity.ok(service.getUser(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable long userId, @RequestBody User user) {
-        return ResponseEntity.ok(service.updateUser(userId, user));
+    public ResponseEntity<User> updateUser(@PathVariable long id, @RequestBody User user) {
+        return ResponseEntity.ok(service.updateUser(id, user));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable long userId) {
-        service.deleteUser(userId);
+    public void deleteUser(@PathVariable long id) {
+        service.deleteUser(id);
     }
 }

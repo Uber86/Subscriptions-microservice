@@ -46,7 +46,7 @@ public class User {
         this.birthday = birthday;
         this.phone = phone;
         this.info = info;
-        this.subscriptions = subscriptions;
+
     }
 
     public Long getId() {
