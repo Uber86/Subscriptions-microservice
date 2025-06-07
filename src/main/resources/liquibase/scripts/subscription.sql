@@ -19,3 +19,10 @@ CREATE TABLE subscriptions(
     data_end TIMESTAMP,
     user_id BIGINT REFERENCES users(id)
 );
+
+-- changeset oss:3
+ALTER TABLE subscriptions
+ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE';
+
+ALTER TABLE subscriptions
+ADD CONSTRAINT status_check CHECK (status IN ('ACTIVE', 'CANCELLED', 'EXPIRED'));
