@@ -8,7 +8,7 @@ public interface SubscriptionService {
 
     Subscription createSubscription(long userId, Subscription subscription);
 
-    List<Subscription> getSubscription(long userId);
+    List<Subscription> getSubscriptions(long userId);
 
     void deleteSubscription(long userId, long subscriptionId);
 

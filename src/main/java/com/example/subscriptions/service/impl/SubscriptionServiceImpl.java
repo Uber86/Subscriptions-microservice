@@ -26,6 +26,13 @@ public class SubscriptionServiceImpl implements SubscriptionService{
     }
 
 
+    /**
+     * Метод создания подписки пользователю
+     * @param userId id пользователя
+     * @param subscription id подписки
+     * Проверяет id пользователя и подписки в БД
+     * @return привязывает подписку пользователю и помечает как Active + с датой
+     */
     @Override
     public Subscription createSubscription(long userId, Subscription subscription) {
         User user = userRepository.findById(userId).orElseThrow(
@@ -39,14 +46,25 @@ public class SubscriptionServiceImpl implements SubscriptionService{
         return subscriptionRepository.save(subscription);
     }
 
+    /**
+     * Метод получение всех подписок пользователя
+     * @param userId id пользователя
+     * @return при нахождении пользователя по id выводит его подписки
+     */
     @Override
-    public List<Subscription> getSubscription(long userId) {
+    public List<Subscription> getSubscriptions(long userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new EntityNotFoundException("Пользователь с таким id не существует"));
         return user.getSubscriptions().stream()
                 .filter(it->it.getStatus()== SubscriptionStatus.ACTIVE).toList();
     }
 
+    /**
+     * Метод для удаления подписки, если быть точнее для деактивации подписки
+     * @param userId принимает id пользователя, проверяет есть ли пользователь в БД
+     * @param subscriptionId принимает id подписки, проверяет существует ли подписка
+     * При успешном нахождении деактивирует подписку + с датой
+     */
     @Override
     public void deleteSubscription(long userId, long subscriptionId) {
         User user = userRepository.findById(userId).orElseThrow(
@@ -61,6 +79,10 @@ public class SubscriptionServiceImpl implements SubscriptionService{
         subscriptionRepository.save(subscription);
     }
 
+    /**
+     * Метод для получения топ-3х подписок по кол-ву пользователей
+     * @return возвращает лист из 3х подписок
+     */
     @Override
     public List<Subscription> getSubscriptionsTopThree() {
         PageRequest topThree = PageRequest.of(0, 3);
