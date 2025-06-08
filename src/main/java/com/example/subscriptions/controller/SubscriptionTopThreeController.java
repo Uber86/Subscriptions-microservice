@@ -1,5 +1,6 @@
 package com.example.subscriptions.controller;
 
+import com.example.subscriptions.dto.SubscriptionDto;
 import com.example.subscriptions.model.Subscription;
 import com.example.subscriptions.service.SubscriptionService;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +27,7 @@ public class SubscriptionTopThreeController {
      *Метод получения топ-3 подписок по пользователям
      */
     @GetMapping("/top")
-    public ResponseEntity<List<Subscription>> getTopSubscriptions() {
+    public ResponseEntity<List<SubscriptionDto>> getTopSubscriptions() {
         return ResponseEntity.ok(service.getSubscriptionsTopThree());
     }
 }

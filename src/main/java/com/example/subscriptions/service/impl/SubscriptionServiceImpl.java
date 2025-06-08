@@ -1,6 +1,9 @@
 package com.example.subscriptions.service.impl;
 
+import com.example.subscriptions.dto.SubscriptionCreateDto;
+import com.example.subscriptions.dto.SubscriptionDto;
 import com.example.subscriptions.enums.SubscriptionStatus;
+import com.example.subscriptions.mapper.SubscriptionMapper;
 import com.example.subscriptions.model.Subscription;
 import com.example.subscriptions.model.User;
 import com.example.subscriptions.repository.SubscriptionRepository;
@@ -19,36 +22,41 @@ import java.util.List;
 @Service
 public class SubscriptionServiceImpl implements SubscriptionService{
 
-    private final UserRepository userRepository;
-    private final SubscriptionRepository subscriptionRepository;
     private static final Logger log = LoggerFactory.getLogger(SubscriptionServiceImpl.class);
 
-    public SubscriptionServiceImpl(UserRepository userRepository, SubscriptionRepository subscriptionRepository) {
+    private final UserRepository userRepository;
+    private final SubscriptionRepository subscriptionRepository;
+    private final SubscriptionMapper mapper;
+
+    public SubscriptionServiceImpl(UserRepository userRepository, SubscriptionRepository subscriptionRepository, SubscriptionMapper mapper) {
         this.userRepository = userRepository;
         this.subscriptionRepository = subscriptionRepository;
+        this.mapper = mapper;
     }
-
 
     /**
      * Метод создания подписки пользователю
      * @param userId id пользователя
-     * @param subscription id подписки
+     * @param dto id подписки
      * Проверяет id пользователя и подписки в БД
      * @return привязывает подписку пользователю и помечает как Active + с датой
      */
     @Override
-    public Subscription createSubscription(long userId, Subscription subscription) {
+    public SubscriptionDto createSubscription(long userId, SubscriptionCreateDto dto) {
         log.info("Создание подписки для пользователя с id {}", userId);
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new EntityNotFoundException("Пользователь с таким id не существует"));
-        if (subscription.getServiceName() == null) {
+        if (dto.getServiceName() == null) {
             throw new IllegalArgumentException("Название сервиса подписки должно быть заполнено");
         }
+        Subscription subscription = mapper.fromCreateDto(dto);
         subscription.setUser(user);
         subscription.setDataStart(LocalDateTime.now());
         subscription.setStatus(SubscriptionStatus.ACTIVE);
-        log.info("Подписка создана: {}", subscription.getServiceName());
-        return subscriptionRepository.save(subscription);
+        Subscription saved = subscriptionRepository.save(subscription);
+        log.info("Подписка '{}' успешно создана для пользователя с id {}",
+                saved.getServiceName(), userId);
+        return mapper.toDto(saved);
     }
 
     /**
@@ -57,16 +65,20 @@ public class SubscriptionServiceImpl implements SubscriptionService{
      * @return при нахождении пользователя по id выводит его подписки
      */
     @Override
-    public List<Subscription> getSubscriptions(long userId) {
+    public List<SubscriptionDto> getSubscriptions(long userId) {
         log.info("Получение подписок для пользователя с id {}", userId);
-        return userRepository.findById(userId)
-                .map(user -> user.getSubscriptions().stream()
-                        .filter(s -> s.getStatus() == SubscriptionStatus.ACTIVE)
-                        .toList())
-                .orElseThrow(() -> {
-                    log.error("Пользователь с id {} не найден", userId);
-                    return new EntityNotFoundException("Пользователь с таким id не существует");
-                });
+        User user = userRepository.findById(userId).orElseThrow(() -> {
+            log.error("Пользователь с id {} не найден", userId);
+            return new EntityNotFoundException("Пользователь с таким id не существует");
+        });
+        List<SubscriptionDto> activeSubscriptions = user.getSubscriptions()
+                .stream()
+                .filter(s -> s.getStatus() == SubscriptionStatus.ACTIVE)
+                .map(mapper::toDto)
+                .toList();
+        log.info("Найдено {} активных подписок для пользователя с id {}",
+                activeSubscriptions.size(), userId);
+        return activeSubscriptions;
     }
 
     /**
@@ -96,16 +108,16 @@ public class SubscriptionServiceImpl implements SubscriptionService{
      * @return возвращает лист из 3х подписок
      */
     @Override
-    public List<Subscription> getSubscriptionsTopThree() {
+    public List<SubscriptionDto> getSubscriptionsTopThree() {
         log.info("Получение топ-3 популярных подписок");
         PageRequest topThree = PageRequest.of(0, 3);
         List<String> serviceNames = subscriptionRepository
                 .findTop3PopularServiceNames(topThree);
-        List<Subscription> result = new ArrayList<>();
+        List<SubscriptionDto> result = new ArrayList<>();
         for (String name : serviceNames) {
-            Subscription sub = new Subscription();
-            sub.setServiceName(name);
-            result.add(sub);
+            SubscriptionDto dto = new SubscriptionDto();
+            dto.setServiceName(name);
+            result.add(dto);
         }
         return result;
     }

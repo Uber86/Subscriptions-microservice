@@ -1,5 +1,7 @@
 package com.example.subscriptions.controller;
 
+import com.example.subscriptions.dto.SubscriptionCreateDto;
+import com.example.subscriptions.dto.SubscriptionDto;
 import com.example.subscriptions.model.Subscription;
 import com.example.subscriptions.service.SubscriptionService;
 import org.springframework.http.ResponseEntity;
@@ -21,16 +23,16 @@ public class SubscriptionController {
      *Метод добавления подписок пользователю
      */
     @PostMapping
-    public ResponseEntity<Subscription> createSubscription(@PathVariable long userId,
-                                                           @RequestBody Subscription subscription) {
-        return ResponseEntity.ok(service.createSubscription(userId, subscription));
+    public ResponseEntity<SubscriptionDto> createSubscription(@PathVariable long userId,
+                                                           @RequestBody SubscriptionCreateDto dto) {
+        return ResponseEntity.ok(service.createSubscription(userId, dto));
     }
 
     /**
      *Метод получения подписок пользователя
      */
     @GetMapping
-    public ResponseEntity<List<Subscription>> getSubscriptions(@PathVariable long userId) {
+    public ResponseEntity<List<SubscriptionDto>> getSubscriptions(@PathVariable long userId) {
         return ResponseEntity.ok(service.getSubscriptions(userId));
     }
 

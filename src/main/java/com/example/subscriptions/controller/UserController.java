@@ -1,5 +1,8 @@
 package com.example.subscriptions.controller;
 
+import com.example.subscriptions.dto.UserCreateDto;
+import com.example.subscriptions.dto.UserDto;
+import com.example.subscriptions.dto.UserUpdateDto;
 import com.example.subscriptions.model.User;
 import com.example.subscriptions.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -17,18 +20,18 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        return ResponseEntity.ok(service.createUser(user));
+    public ResponseEntity<UserDto> createUser(@RequestBody UserCreateDto dto) {
+        return ResponseEntity.ok(service.createUser(dto));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable long id) {
+    public ResponseEntity<UserDto> getUser(@PathVariable long id) {
         return ResponseEntity.ok(service.getUser(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable long id, @RequestBody User user) {
-        return ResponseEntity.ok(service.updateUser(id, user));
+    public ResponseEntity<UserDto> updateUser(@PathVariable long id, @RequestBody UserUpdateDto dto) {
+        return ResponseEntity.ok(service.updateUser(id, dto));
     }
 
     @DeleteMapping("/{id}")

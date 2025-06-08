@@ -1,14 +1,17 @@
 package com.example.subscriptions.service;
 
+import com.example.subscriptions.dto.UserCreateDto;
+import com.example.subscriptions.dto.UserDto;
+import com.example.subscriptions.dto.UserUpdateDto;
 import com.example.subscriptions.model.User;
 
 public interface UserService {
 
-    User createUser(User user);
+    UserDto createUser(UserCreateDto dto);
 
-    User getUser(long id);
+    UserDto getUser(long userId);
 
-    User updateUser(long id, User user);
+    UserDto updateUser(long userId, UserUpdateDto dto);
 
     void deleteUser(long id);
 }

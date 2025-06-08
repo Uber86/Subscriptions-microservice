@@ -1,5 +1,9 @@
 package com.example.subscriptions.service.impl;
 
+import com.example.subscriptions.dto.UserCreateDto;
+import com.example.subscriptions.dto.UserDto;
+import com.example.subscriptions.dto.UserUpdateDto;
+import com.example.subscriptions.mapper.UserMapper;
 import com.example.subscriptions.model.User;
 import com.example.subscriptions.repository.UserRepository;
 import com.example.subscriptions.service.UserService;
@@ -14,21 +18,25 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
     private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
-    public UserServiceImpl(UserRepository userRepository) {
+    private final UserRepository userRepository;
+    private final UserMapper userMapper;
+
+    public UserServiceImpl(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
     /**
      * Метод добавления пользователя
-     * @param user принимает данные
+     * @param dto принимает данные
      * @return сохраняет пользователя при выполнении условии
      */
     @Override
-    public User createUser(User user) {
-        log.info("Создание пользователя с email {}", user.getEmail());
+    public UserDto createUser(UserCreateDto dto) {
+        log.info("Создание пользователя с email {}", dto.getEmail());
+        User user = userMapper.fromCreateDto(dto);
         if(user.getPhone() == null &&
                 user.getEmail() == null &&
                 user.getFirstName() == null &&
@@ -39,7 +47,7 @@ public class UserServiceImpl implements UserService {
         }
         User savedUser = userRepository.save(user);
         log.info("Пользователь с id {} успешно создан", savedUser.getId());
-        return savedUser;
+        return userMapper.toDto(savedUser);
     }
 
     /**
@@ -48,49 +56,38 @@ public class UserServiceImpl implements UserService {
      * @return возвращает пользователя если таков имеется
      */
     @Override
-    public User getUser(long userId) {
+    public UserDto getUser(long userId) {
         log.info("Запрос на получение пользователя с id: {}", userId);
-        return userRepository.findById(userId).orElseThrow(
+        User user = userRepository.findById(userId).orElseThrow(
                 ()-> {
                     log.error("Пользователь с id {} не найден", userId);
                     return new EntityNotFoundException("Пользователь не найден");
                 });
+        return userMapper.toDto(user);
     }
 
     /**
      * Метод обновления пользователя
      * @param userId находим пользователя по его id
-     * @param user обновленные данные пользователя
+     * @param dto обновленные данные пользователя
      * @return возвращает при выполнении сохраненные данные пользователя
      */
     @Override
-    public User updateUser(long userId, User user) {
+    public UserDto updateUser(long userId, UserUpdateDto dto) {
         log.info("Запрос на обновление пользователя с id: {}", userId);
         User existingUser = userRepository.findById(userId).orElseThrow(
                 () -> {
                     log.error("Пользователь с id {} не найден для обновления", userId);
                     return new EntityNotFoundException("Пользователь не найден");
                 });
-        if (user != null) {
-
-            if(user.getEmail() != null &&
-                    user.getPhone()!= null &&
-                    user.getFirstName() != null &&
-                    user.getLastName() != null) {
-                existingUser.setEmail(user.getEmail());
-                existingUser.setBirthday(user.getBirthday());
-                existingUser.setFirstName(user.getFirstName());
-                existingUser.setLastName(user.getLastName());
-                existingUser.setPhone(user.getPhone());
-                existingUser.setInfo(user.getInfo());
-            }
-
-            return userRepository.save(existingUser);
-        }else{
-            log.warn("Переданы пустые данные для обновления пользователя с id {}", userId);
+        if (dto == null) {
+            log.warn("Пустые данные для обновления пользователя с id {}", userId);
             throw new IllegalArgumentException("Данные отсутствуют");
         }
-
+        userMapper.updateFromDto(dto, existingUser);
+        User updatedUser = userRepository.save(existingUser);
+        log.info("Пользователь с id {} успешно обновлен", userId);
+        return userMapper.toDto(updatedUser);
     }
 
     /**
