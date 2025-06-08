@@ -1,6 +1,7 @@
 package com.example.subscriptions.dto;
 
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -9,8 +10,9 @@ public class UserUpdateDto {
     @Email(message = "Некорректный формат email")
     private String email;
 
-    @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}",
-            message = "Дата рождения должна быть в формате ГГГГ-ММ-ДД")
+    @PastOrPresent(message = "Дата рождения не может быть в будущем")
+    @Pattern(regexp = "\\d{2}-\\d{2}-\\d{4}",
+            message = "Дата рождения должна быть в формате ДД-ММ-ГГГГ")
     private String birthday;
 
     @Size(min = 2, max = 25)
@@ -19,7 +21,8 @@ public class UserUpdateDto {
     @Size(min = 2, max = 25)
     private String lastName;
 
-    @Pattern(regexp = "\\+?\\d{10,15}")
+    @Pattern(regexp = "\\+7\\s?\\(?\\d{3}\\)?\\s?\\d{3}-?\\d{2}-?\\d{2}",
+            message = "Неверный формат телефона")
     private String phone;
 
     private String info;

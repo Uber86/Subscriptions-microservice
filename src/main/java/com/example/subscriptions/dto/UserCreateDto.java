@@ -1,9 +1,6 @@
 package com.example.subscriptions.dto;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 public class UserCreateDto {
 
@@ -11,8 +8,10 @@ public class UserCreateDto {
     @NotBlank(message = "Email обязателен")
     private String email;
 
+    @PastOrPresent(message = "Дата рождения не может быть в будущем")
     @NotBlank(message = "Дата рождения обязательна")
-    @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}", message = "Дата рождения должна быть в формате ГГГГ-ММ-ДД")
+    @Pattern(regexp = "\\d{2}-\\d{2}-\\d{4}",
+            message = "Дата рождения должна быть в формате ДД-ММ-ГГГГ")
     private String birthday;
 
     @NotBlank(message = "Имя обязательно")
@@ -24,8 +23,8 @@ public class UserCreateDto {
     private String lastName;
 
     @NotBlank(message = "Телефон обязателен")
-    @Pattern(regexp = "\\+?\\d{10,15}",
-            message = "Телефон должен содержать от 10 до 15 цифр, может начинаться с +")
+    @Pattern(regexp = "\\+7\\s?\\(?\\d{3}\\)?\\s?\\d{3}-?\\d{2}-?\\d{2}",
+            message = "Неверный формат телефона")
     private String phone;
 
     public UserCreateDto() {

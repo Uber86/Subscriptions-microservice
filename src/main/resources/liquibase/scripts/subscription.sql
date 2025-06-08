@@ -7,7 +7,7 @@ CREATE TABLE users(
     first_name varchar(25) NOT NULL,
     last_name varchar(25) NOT NULL,
     birthday varchar(10) NOT NULL,
-    phone varchar(12) NOT NULL,
+    phone varchar(12) UNIQUE NOT NULL,
     info varchar(300)
 );
 
