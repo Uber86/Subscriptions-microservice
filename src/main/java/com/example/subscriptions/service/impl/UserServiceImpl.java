@@ -4,6 +4,8 @@ import com.example.subscriptions.model.User;
 import com.example.subscriptions.repository.UserRepository;
 import com.example.subscriptions.service.UserService;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 /**
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
 
     public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -25,14 +28,18 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User createUser(User user) {
+        log.info("Создание пользователя с email {}", user.getEmail());
         if(user.getPhone() == null &&
                 user.getEmail() == null &&
                 user.getFirstName() == null &&
                 user.getLastName() == null &&
                 user.getBirthday() == null) {
+            log.warn("Попытка создать пользователя с пустыми обязательными полями");
             throw new IllegalArgumentException("Отсутствует поле");
         }
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        log.info("Пользователь с id {} успешно создан", savedUser.getId());
+        return savedUser;
     }
 
     /**
@@ -42,8 +49,12 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User getUser(long userId) {
+        log.info("Запрос на получение пользователя с id: {}", userId);
         return userRepository.findById(userId).orElseThrow(
-                ()-> new EntityNotFoundException("Пользователь не найден"));
+                ()-> {
+                    log.error("Пользователь с id {} не найден", userId);
+                    return new EntityNotFoundException("Пользователь не найден");
+                });
     }
 
     /**
@@ -54,9 +65,14 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User updateUser(long userId, User user) {
+        log.info("Запрос на обновление пользователя с id: {}", userId);
         User existingUser = userRepository.findById(userId).orElseThrow(
-                () -> new EntityNotFoundException("Пользователь не найден"));
+                () -> {
+                    log.error("Пользователь с id {} не найден для обновления", userId);
+                    return new EntityNotFoundException("Пользователь не найден");
+                });
         if (user != null) {
+
             if(user.getEmail() != null &&
                     user.getPhone()!= null &&
                     user.getFirstName() != null &&
@@ -71,6 +87,7 @@ public class UserServiceImpl implements UserService {
 
             return userRepository.save(existingUser);
         }else{
+            log.warn("Переданы пустые данные для обновления пользователя с id {}", userId);
             throw new IllegalArgumentException("Данные отсутствуют");
         }
 
@@ -82,8 +99,12 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public void deleteUser(long userId) {
-        User user = userRepository.findById(userId).orElseThrow(
-                () -> new EntityNotFoundException("Пользователь с таким id не существует"));
+        log.info("Запрос на удаление пользователя с id: {}", userId);
+        User user = userRepository.findById(userId).orElseThrow(() -> {
+            log.error("Пользователь с id {} не найден для удаления", userId);
+            return new EntityNotFoundException("Пользователь с таким id не существует");
+        });
         userRepository.deleteById(userId);
+        log.info("Пользователь с id {} успешно удален", userId);
     }
 }
